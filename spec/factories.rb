@@ -8,6 +8,7 @@ FactoryGirl.define do
         factory :body_text do
             content_type 'text/plain'
             body { 'hereisthetext' }
+            filename 'attachment.txt'
         end
         factory :pdf_attachment do
             content_type 'application/pdf'

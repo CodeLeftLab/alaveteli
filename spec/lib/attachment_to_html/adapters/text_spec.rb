@@ -40,6 +40,34 @@ describe AttachmentToHTML::Adapters::Text do
             text_adapter.to_html.should match(/<div id="wrap">#{ attachment.body }<\/div>/)
         end
  
+        it 'strips the body of trailing whitespace' do
+            attachment = FactoryGirl.build(:body_text, :body => ' Hello ')
+            expected = 'Hello'
+            text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
+            text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+        end
+
+        it 'escapes special characters' do
+           attachment = FactoryGirl.build(:body_text, :body => 'Usage: foo "bar" <baz>')
+           expected = "Usage: foo &quot;bar&quot; &lt;baz&gt;"
+           text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
+           text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+        end
+
+        it 'creates hyperlinks for text that looks like a url' do
+            attachment = FactoryGirl.build(:body_text, :body => 'http://www.whatdotheyknow.com')
+            expected = %Q(<a href='http://www.whatdotheyknow.com'>http://www.whatdotheyknow.com</a>)
+            text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
+            text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+        end
+
+        it 'substitutes newlines for br tags' do
+            attachment = FactoryGirl.build(:body_text, :body => "A\nNewline")
+            expected = %Q(A<br>Newline)
+            text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
+            text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+        end
+
     end
 
 end

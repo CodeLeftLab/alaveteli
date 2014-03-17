@@ -38,7 +38,10 @@ module AttachmentToHTML
             end
 
             def body
-                attachment.body
+                text = attachment.body.strip
+                text = CGI.escapeHTML(text)
+                text = MySociety::Format.make_clickable(text)
+                text = text.gsub(/\n/, '<br>')
             end
 
         end

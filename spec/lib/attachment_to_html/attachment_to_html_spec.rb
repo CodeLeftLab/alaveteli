@@ -11,6 +11,11 @@ describe AttachmentToHTML do
             AttachmentToHTML::Adapters::Text.should_receive(:new).with(attachment).and_call_original
             to_html(attachment)
         end
+
+        it 'converts the attachment to html in the correct format' do
+            expected = AttachmentToHTML::Adapters::Text.new(attachment).to_html
+            to_html(attachment).should == expected
+        end
  
     end
 

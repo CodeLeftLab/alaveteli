@@ -7,7 +7,7 @@ module AttachmentToHTML
 
     def to_html(attachment)
         converter = adapter_for(attachment.content_type)
-        converter.new(attachment)
+        converter.new(attachment).to_html
     end
 
     private

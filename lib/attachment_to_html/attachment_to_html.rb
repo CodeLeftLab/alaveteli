@@ -15,6 +15,7 @@ module AttachmentToHTML
     def adapter_for(content_type)
         case content_type
         when 'text/plain' then Adapters::Text
+        when 'application/pdf' then Adapters::PDF
         end
     end
 

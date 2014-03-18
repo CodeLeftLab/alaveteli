@@ -39,18 +39,20 @@ describe AttachmentToHTML::Adapters::PDF do
         end
 
         it 'contains the attachment filename in the title tag' do
-            pdf_adapter.to_html.should match(/<title>#{ attachment.display_filename }<\/title>/)
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html)
+            parsed.css('title').inner_html.should == attachment.display_filename
         end
 
         it 'contains the wrapper div in the body tag' do
             pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment, :wrapper => 'wrap')
-            expected = /<body[^>]*\><div id="wrap">.*<\/body>/im
-            pdf_adapter.to_html.should match(expected)
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html)
+            parsed.css('body div').first.attributes['id'].value.should == 'wrap'
         end
- 
+
         it 'contains the attachment body in the wrapper div' do
             pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment, :wrapper => 'wrap')
-            pdf_adapter.to_html.should match(/<div id="wrap">.*thisisthebody.*<\/div>/im)
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html)
+            parsed.css('div#wrap').inner_html.should include('thisisthebody')
         end
 
         it 'operates in the context of the supplied tmpdir' do

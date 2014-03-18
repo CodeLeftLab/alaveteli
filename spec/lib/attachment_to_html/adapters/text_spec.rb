@@ -26,46 +26,51 @@ describe AttachmentToHTML::Adapters::Text do
         end
 
         it 'contains the attachment filename in the title tag' do
-            text_adapter.to_html.should match(/<title>#{ attachment.display_filename }<\/title>/)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed.css('title').inner_html.should == attachment.display_filename
         end
 
         it 'contains the wrapper div in the body tag' do
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment, :wrapper => 'wrap')
-            expected = /<body[^>]*\><div id="wrap">.*<\/body>/im
-            text_adapter.to_html.should match(expected)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed.css('body').children.first.attributes['id'].value.should == 'wrap'
         end
 
         it 'contains the attachment body in the wrapper div' do
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment, :wrapper => 'wrap')
-            text_adapter.to_html.should match(/<div id="wrap">#{ attachment.body }<\/div>/)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed.css('div#wrap').inner_html.should == attachment.body
         end
  
         it 'strips the body of trailing whitespace' do
             attachment = FactoryGirl.build(:body_text, :body => ' Hello ')
-            expected = 'Hello'
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed.css('div#wrapper').inner_html.should == 'Hello'
         end
 
         it 'escapes special characters' do
-           attachment = FactoryGirl.build(:body_text, :body => 'Usage: foo "bar" <baz>')
-           expected = "Usage: foo &quot;bar&quot; &lt;baz&gt;"
-           text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-           text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+            attachment = FactoryGirl.build(:body_text, :body => 'Usage: foo "bar" >baz<')
+            text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            expected = %Q(Usage: foo &quot;bar&quot; &gt;baz&lt;)
+            parsed.css('div#wrapper').inner_html.should == expected
         end
 
         it 'creates hyperlinks for text that looks like a url' do
             attachment = FactoryGirl.build(:body_text, :body => 'http://www.whatdotheyknow.com')
-            expected = %Q(<a href='http://www.whatdotheyknow.com'>http://www.whatdotheyknow.com</a>)
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed.css('div#wrapper a').first.text.should == 'http://www.whatdotheyknow.com'
+            parsed.css('div#wrapper a').first['href'].should == 'http://www.whatdotheyknow.com'
         end
 
         it 'substitutes newlines for br tags' do
             attachment = FactoryGirl.build(:body_text, :body => "A\nNewline")
-            expected = %Q(A<br>Newline)
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            text_adapter.to_html.should match(/<div id="wrapper">#{ expected }<\/div>/)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            expected = %Q(A<br>Newline)
+            parsed.css('div#wrapper').inner_html.should == expected
         end
 
     end

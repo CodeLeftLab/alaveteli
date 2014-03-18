@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../../spec_helper')
 
-describe AttachmentToHTML::Adapters::PDF do
+describe AttachmentToHTML::Adapters::RTF do
 
     let(:attachment) { FactoryGirl.build(:rtf_attachment) }
     let(:rtf_adapter) { AttachmentToHTML::Adapters::RTF.new(attachment) }
@@ -33,24 +33,21 @@ describe AttachmentToHTML::Adapters::PDF do
 
     describe :to_html do
 
-        it 'looks roughly like a html document' do
-            htmlish = /<!DOCTYPE html>.*<html.*>.*<head>.*<title>.*<\/title>.*<\/head>.*<body.*>.*<\/body>.*<\/html>/im
-            rtf_adapter.to_html.should match(htmlish)
-        end
-
         it 'contains the attachment filename in the title tag' do
-            rtf_adapter.to_html.should match(/<title>#{ attachment.display_filename }<\/title>/)
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html)
+            parsed.css('head title').inner_html.should == attachment.display_filename
         end
 
         it 'contains the wrapper div in the body tag' do
             rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment, :wrapper => 'wrap')
-            expected = /<body[^>]*\><div id="wrap">.*<\/body>/im
-            rtf_adapter.to_html.should match(expected)
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html)
+            parsed.css('body div').first.attributes['id'].value.should == 'wrap'
         end
- 
+
         it 'contains the attachment body in the wrapper div' do
             rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment, :wrapper => 'wrap')
-            rtf_adapter.to_html.should match(/<div id="wrap">.*thisisthebody.*<\/div>/im)
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html)
+            parsed.css('div#wrap').inner_text.should include('thisisthebody')
         end
 
         it 'operates in the context of the supplied tmpdir' do

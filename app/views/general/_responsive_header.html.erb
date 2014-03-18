@@ -1,0 +1,70 @@
+<header id="page_header" class="page_header">
+
+    <div class="header_content">
+      <div class="ms_header">
+      <div class="ms_header_nav">
+        <nav>
+          <ul class="menu">
+            <%= render :partial => 'general/responsive_locale_switcher' %>
+            <li id="ms_logo"><a class="ms_header_nav-logo" href="http://mysociety.org">mySociety</a></li>
+            <li><a class="ms_header_nav-about" href="<%= help_about_path %>"><%= _("About") %></a></li>
+            <li><a class="ms_header_nav-blog" href="<%= blog_path %>"><%= _("Read blog") %></a></li>
+
+          </ul>
+        </nav>
+      </div>
+    </div>
+    <div class="logo">
+      <a href="<%= frontpage_path %>"> <%= image_tag "logo.png", :alt => "" %></a>
+    </div>
+    <div class="rsp_menu_button">
+            <a href="#page_header" class="open"> <i class="icon-menu"></i> Menu </a>
+            <a href="#" class="close"> <i class="icon-menu"></i> Close </a>
+        </div>
+    <div class="login-block">
+    <% if @user %>
+      <p class="user-greeting"><%= _('Hello, {{username}}!', :username => h(@user.name))%></p>
+
+        <%=link_to _("My profile"), show_user_profile_path(:url_name => @user.url_name) %>
+        <%=link_to _("My requests"), show_user_requests_path(:url_name => @user.url_name) %>
+        <%=link_to _("My Wall"), show_user_wall_path(:url_name => @user.url_name) %>
+        <%= link_to _("Logout"), signout_path(:r => request.fullpath) %>
+    <% else %>
+
+      <p><%= _('Been here before?')%> <a href="<%= signin_path(:r => request.fullpath) %>"><%= _("Login") %></a></p>
+    <% end %>
+    </div>
+
+    </div>
+    <div class="main_menu">
+    <ul>
+      <li class="menu-newrequest <%= 'active' if params[:controller] == 'request' and ['new', 'select_authority'].include?(params[:action]) %>">
+        <a href="<%= select_authority_path %>">
+        <%= _("Make a request") %>
+        </a>
+      </li>
+      <li class="menu-viewrequests  <%= 'active' if params[:controller] == 'request' and !['new', 'select_authority'].include?(params[:action]) %>">
+        <a href="<%= request_list_successful_path %>">
+        <%= _("View requests") %>
+        </a>
+      </li>
+      <li class="menu-viewauthorities <%= 'active' if params[:controller] == 'public_body' %>">
+        <a href="<%= list_public_bodies_default_path %>">
+        <%= _("View authorities") %>
+        </a>
+        </li>
+      <li class="menu-help <%= 'active' if params[:controller] == 'help' %>">
+        <a href="<%= help_about_path %>">
+        <%= _("Help") %>
+        </a>
+      </li>
+      <li class="menu-search">
+        <form method="post" action="<%= search_redirect_path %>">
+          <label for="navigation_search_button"><%= image_tag "search.png", :alt => "Search:" %></label>
+          <%= text_field_tag 'query', params[:query], :id => "navigation_search_button" %>
+         </form>
+      </li>
+    </ul>
+  </div>
+
+</header>

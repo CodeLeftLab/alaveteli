@@ -1,0 +1,17 @@
+<% if FastGettext.default_available_locales.length > 1 && !params.empty? %>
+  <li id="lang_switcher">
+      <a href="#" data-dropdown="droplang" class="ms_header_nav-lang">
+        <%= image_tag "lang/#{FastGettext.locale}.png", :alt => locale_name(FastGettext.locale) %>
+      </a>
+
+      <ul id="droplang" data-dropdown-content class="lang-dropdown">
+          <% for possible_locale in FastGettext.default_available_locales %>
+          <li>
+            <a lang="<%= possible_locale %>" href="<%= url_for params.merge(:locale => possible_locale) %>">
+              <%= image_tag "lang/#{possible_locale}.png", :alt => locale_name(possible_locale) %><%= locale_name(possible_locale) %>
+            </a>
+          </li>
+          <% end %>
+      </ul>
+  </li>
+<% end %>

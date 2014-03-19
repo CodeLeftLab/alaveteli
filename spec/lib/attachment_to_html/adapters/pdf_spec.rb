@@ -62,4 +62,28 @@ describe AttachmentToHTML::Adapters::PDF do
         end
 
     end
+
+    describe :success? do
+
+        it 'is successful if the body has content excluding the tags' do
+            pdf_adapter.to_html
+            pdf_adapter.success?.should be_true
+        end
+
+        it 'is successful if the body contains images' do
+            mocked_return = %Q(<!DOCTYPE html><html><head></head><body><img src="logo.png" /></body></html>)
+            pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment)
+            pdf_adapter.stub(:to_html).and_return(mocked_return)
+            pdf_adapter.success?.should be_true
+        end
+
+        it 'is not successful if the body has no content other than tags' do
+            attachment = FactoryGirl.build(:body_text, :body => '')
+            pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment)
+            pdf_adapter.to_html
+            pdf_adapter.success?.should be_false
+        end
+
+    end
+
 end

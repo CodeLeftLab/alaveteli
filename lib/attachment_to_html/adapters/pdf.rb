@@ -23,12 +23,23 @@ module AttachmentToHTML
             #
             # Returns a String
             def to_html
+                @html ||= generate_html
+            end
+
+            # Public: Was the document conversion successful?
+            #
+            # Returns a Boolean
+            def success?
+                has_content? || contains_images?
+            end
+
+            private
+
+            def generate_html
                 html = convert
                 html = inject_title(html)
                 html = inject_wrapper(html)
             end
-
-            private
 
             def title
                 attachment.display_filename
@@ -82,6 +93,24 @@ module AttachmentToHTML
 
             def wrapper_div(contents)
                 %Q(<div id="#{ wrapper }">#{ contents }</div>)
+            end
+
+            # Does the body element have any content, excluding HTML tags?
+            #
+            # Returns a Boolean
+            def has_content?
+                !parsed.css('body').inner_text.empty?
+            end
+
+            def contains_images?
+                parsed.css('body img').any?
+            end
+
+            # Parse the output of to_html to check for success
+            #
+            # Returns a Nokogiri::HTML::Document
+            def parsed
+                @parsed ||= Nokogiri::HTML.parse(to_html)
             end
 
         end

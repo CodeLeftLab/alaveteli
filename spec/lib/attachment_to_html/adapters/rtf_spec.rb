@@ -57,4 +57,28 @@ describe AttachmentToHTML::Adapters::RTF do
         end
 
     end
+
+    describe :success? do
+
+        it 'is successful if the body has content excluding the tags' do
+            rtf_adapter.to_html
+            rtf_adapter.success?.should be_true
+        end
+
+        it 'is successful if the body contains images' do
+            mocked_return = %Q(<!DOCTYPE html><html><head></head><body><img src="logo.png" /></body></html>)
+            rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment)
+            rtf_adapter.stub(:to_html).and_return(mocked_return)
+            rtf_adapter.success?.should be_true
+        end
+
+        it 'is not successful if the body has no content other than tags' do
+            attachment = FactoryGirl.build(:body_text, :body => '')
+            rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment)
+            rtf_adapter.to_html
+            rtf_adapter.success?.should be_false
+        end
+
+    end
+
 end
